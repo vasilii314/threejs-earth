@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Earth</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@1,700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .font-space-mono {
+            font-family: 'Space Mono', monospace;
+        }
+
+        .font-exo {
+            font-family: 'Exo 2', sans-serif;
+        }
+
+        .font-lato {
+            font-family: 'Lato', sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="flex h-screen">
+        <div class="w-1/2 flex flex-col justify-center px-8 bg-black">
+            <div style="max-width: 500px;">
+                <h1 class="text-white text-4xl mb-8 font-exo leading-none">Earth</h1>
+                <p class="text-gray-400 mb-8 font-lato">Lorem ipsum dolor sit amet consectetur adipisicing elit. Sed
+                    quae corrupti doloribus! Dignissimos accusantium ad debitis, vero praesentium reiciendis minus.</p>
+                <div>
+                    <a href="#" class="text-white bg-green-600 inline-block px-8 rounded-full py-4 font-lato">Button</a>
+                </div>
+            </div>
+            </div>
+            <div class="w-1/2" id="canvascontainer">
+                <canvas id="canvas"></canvas>
+            </div>
+    </div>
+    <script type="x-shader/x-vertex" id="vertexshader">
+        varying vec2 vertexUV;
+        varying vec3 vertexNormal;
+        
+        void main() {
+            vertexUV = uv;
+            vertexNormal = normalize(normalMatrix * normal);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        }
+    </script>
+    <script type="x-shader/x-vertex" id="fragmentshader">
+        uniform sampler2D globeTexture;
+
+        varying vec2 vertexUV;
+        varying vec3 vertexNormal;
+
+        void main() {
+            float intensity = 1.05 - dot(vertexNormal, vec3(0.0, 0.0, 1.0));
+            vec3 atmosphere = vec3(0.3, 0.6, 1.0) * pow(intensity, 1.5);
+
+            gl_FragColor = vec4(atmosphere + texture2D(globeTexture, vertexUV).xyz, 1.0);
+        }
+    </script>
+    <script type="x-shader/x-vertex" id="atmospherevertexshader">
+        varying vec3 vertexNormal;
+        
+        void main() {
+            vertexNormal = normalize(normalMatrix * normal);
+            gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 0.9);
+        }
+    </script>
+    <script type="x-shader/x-vertex" id="atmospherefragmentshader">
+        varying vec3 vertexNormal;
+
+        void main() {
+            float intensity = pow(0.6 - dot(vertexNormal, vec3(0, 0, 1.0)), 2.0);
+            gl_FragColor = vec4(0.3, 0.6, 1.0, 1.0) * intensity;
+        }
+    </script>
+    <script type="module" src="./index.js"></script>
+</body>
+
+</html>
